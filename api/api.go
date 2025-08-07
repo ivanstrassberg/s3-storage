@@ -8,11 +8,11 @@ import (
 )
 
 type ApiServer struct {
-	store db.Storage
+	store db.PostgresDB
 	port  string
 }
 
-func MakeApiServer(port string, store db.Storage) *ApiServer {
+func MakeApiServer(port string, store db.PostgresDB) *ApiServer {
 	return &ApiServer{
 		store: store,
 		port:  port,
@@ -22,26 +22,24 @@ func MakeApiServer(port string, store db.Storage) *ApiServer {
 func (s *ApiServer) HandleEndpoints() error {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/test", makehttpHandlerFunc(s.handleTest))
-	mux.HandleFunc("/test", makehttpHandlerFunc(s.handleAddFile))
+	mux.HandleFunc("POST /add/", makehttpHandlerFunc(s.handleAddFile))
 	log.Printf("Running on port %s", s.port)
 	http.ListenAndServe(s.port, mux)
 	return nil
 }
 
 func (s *ApiServer) handleTest(w http.ResponseWriter, r *http.Request) error {
+	// idk lol maybe not
+	// params := r.URL.Query()
+	// filePath := params.Get("path")
 	WriteJson(w, http.StatusOK, "hey, its S3 speaking")
 	return nil
 }
 
 func (s *ApiServer) handleAddFile(w http.ResponseWriter, r *http.Request) error {
-	
+
 	WriteJson(w, http.StatusOK, "file added")
 	return nil
-}
-
-type RespWriterRequest struct {
-	w http.ResponseWriter
-	r *http.Request
 }
 
 type apiFunc func(w http.ResponseWriter, r *http.Request) error
